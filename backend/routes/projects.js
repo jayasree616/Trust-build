@@ -29,21 +29,75 @@ router.get("/:id", async (req, res) => {
 // Create a new project
 router.post("/", uploadProject.single("image"), async (req, res) => {
   try {
-    const { name, description } = req.body;
+    console.log("📥 Request body:", req.body);
+    console.log("📸 Request file:", req.file);
+
+    const { name, description, location, price } = req.body;  
 
     if (!req.file) {
       return res.status(400).json({ message: "Image is required" });
     }
 
-    const project = new Project({
+    const projectData = {
       name,
       description,
       image: req.file.path,
       imagePublicId: req.file.filename,
-    });
+    };
 
+  
+    if (location) projectData.location = location;
+    if (price) projectData.price = Number(price);
+
+    console.log("💾 Creating project:", projectData);
+
+    const project = new Project(projectData);
     const savedProject = await project.save();
+    
+    console.log("✅ Project saved:", savedProject._id);
     res.status(201).json(savedProject);
+  } catch (error) {
+    console.error("❌ Error creating project:", error);
+    res.status(400).json({ message: error.message });
+  }
+});
+
+// Update project
+router.put("/:id", uploadProject.single("image"), async (req, res) => {
+  try {
+    const { name, description, location, price } = req.body;
+    
+    const updateData = {
+      name,
+      description,
+    };
+
+    if (location) updateData.location = location;
+    if (price) updateData.price = Number(price);
+
+    // If new image uploaded
+    if (req.file) {
+      // Delete old image from Cloudinary
+      const oldProject = await Project.findById(req.params.id);
+      if (oldProject && oldProject.imagePublicId) {
+        await cloudinary.uploader.destroy(oldProject.imagePublicId);
+      }
+      
+      updateData.image = req.file.path;
+      updateData.imagePublicId = req.file.filename;
+    }
+
+    const updatedProject = await Project.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true }
+    );
+
+    if (!updatedProject) {
+      return res.status(404).json({ message: "Project not found" });
+    }
+
+    res.json(updatedProject);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
