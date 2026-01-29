@@ -7,19 +7,20 @@ dotenv.config();
 
 const app = express();
 
-// CORS - ALLOW ALL VERCEL PREVIEW URLS
+// ✅ UPDATED CORS - Add your friend's Vercel URL
 app.use(
   cors({
     origin: [
       "http://localhost:5173",
       "http://localhost:3000",
-      /^https:\/\/real-trust-.*\.vercel\.app$/, // All Vercel preview URLs
+      "https://trust-build.vercel.app",  // ✅ Add this exact URL
+      /^https:\/\/trust-build-.*\.vercel\.app$/,  // ✅ All preview URLs
       process.env.FRONTEND_URL,
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-  }),
+  })
 );
 
 app.use(express.json());
@@ -28,17 +29,17 @@ app.use(express.urlencoded({ extended: true }));
 // Connect to MongoDB
 connectDB();
 
-// Routes - FIXED FILE NAMES
-app.use("/api/projects", require("./routes/projects")); // Changed
-app.use("/api/clients", require("./routes/clients")); // Changed
-app.use("/api/contacts", require("./routes/contacts")); // Changed
-app.use("/api/newsletter", require("./routes/newsletter")); // Changed
+// Routes
+app.use("/api/projects", require("./routes/projects"));
+app.use("/api/clients", require("./routes/clients"));
+app.use("/api/contacts", require("./routes/contacts"));
+app.use("/api/newsletter", require("./routes/newsletter"));
 
 // Health check
 app.get("/", (req, res) => {
   res.json({
     success: true,
-    message: "Real Trust API is running",
+    message: "Trust Build API is running",
     timestamp: new Date().toISOString(),
   });
 });
