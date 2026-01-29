@@ -11,6 +11,15 @@ const projectSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    location: { 
+      type: String,
+      required: false,
+      trim: true,
+    },
+    price: {  
+      type: Number,
+      required: false,
+    },
     image: {
       type: String,
       required: true,
@@ -21,7 +30,7 @@ const projectSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 module.exports = mongoose.model("Project", projectSchema);
